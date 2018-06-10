@@ -25,7 +25,7 @@ void setup() {
 
 void draw() {
   //set the first image you will see (will appear as the top layer, even though it's actually the background)
-  background(vr);
+  image(vr, 0,0 );
   
   //set up counter
   int passedTime = millis() - savedTime;
