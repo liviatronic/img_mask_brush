@@ -37,29 +37,27 @@ void draw() {
     cam.read();
   }
   image(cam, 0, 0, width, height);
-  
-  if (mouseDragged) {
-    graphicMask1.beginDraw();
-    graphicMask1.noStroke();
-    graphicMask1.ellipse(mouseX, mouseY, 80, 80);
-    graphicMask1.endDraw();
-  }
+
+  graphicMask2.beginDraw();
+  graphicMask2.noStroke();
+  graphicMask2.ellipse(mouseX, mouseY, 30, 30);
+  graphicMask2.endDraw();
   
   //draw the second mask shape
-  //graphicMask2.beginDraw();
-  //graphicMask2.noStroke();
-  //graphicMask2.ellipse(mouseX, mouseY, 100, 100);
-  //graphicMask2.endDraw();
+  graphicMask1.beginDraw();
+  graphicMask1.noStroke();
+  graphicMask1.ellipse(mouseX, mouseY, 100, 100);
+  graphicMask1.endDraw();
   
-  //show the first image
-  mask1Reveal();
+  //mask 1 draws whatever was in the frame when the mouse last clicked, 
+  //including freezing whatever frame mask 2 was on
+  mask2Reveal();
   
-  //after the timer is up, show the second image
-  //if (mousePressed) {
-  //  mask1Reveal();
-  //}
+  if (mousePressed) {
+    //mask 2 plays the video as normal
+    mask1Reveal();
+  }
 }
-
 
 
 //load an image and mask it with the PGraphics shape 1
@@ -70,13 +68,13 @@ void mask1Reveal() {
 }
 
 //load another image and mask it with the PGraphics shape 2
-//void mask2Reveal() {
-//  revealedImage = mov.get();
-//  revealedImage.mask(graphicMask2);
-//  image(revealedImage, 0, 0);
-//}
+void mask2Reveal() {
+  revealedImage = mov.get();
+  revealedImage.mask(graphicMask2);
+  image(revealedImage, 0, 0);
+}
 
-void mouseReleased() {
+void mouseClicked() {
   loadPixels();
   vr.loadPixels();
   vr.pixels = pixels;
