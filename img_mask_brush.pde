@@ -1,19 +1,13 @@
-//modifying to use arrays for storing mouse position history
+//using pixels to draw the background
 
 import processing.video.*;
 
 Capture cam;
 Movie mov;
 PImage vr;
-
 PImage revealedImage;
 PGraphics graphicMask1;
 PGraphics graphicMask2;
-
-int num = 5;
-int[] x = new int[num];
-int[] y = new int[num];
-int indexPosition = 0;
 
 
 void setup() {
@@ -44,38 +38,26 @@ void draw() {
   }
   image(cam, 0, 0, width, height);
   
-  //draw the first mask shape
-  x[indexPosition] = mouseX;
-  y[indexPosition] = mouseY;
-  indexPosition = (indexPosition + 1) % num;
-  graphicMask1.beginDraw();
-  graphicMask1.noStroke();
-  for (int i = 0; i < num; i++) {
-    int pos = (indexPosition + 1) % num;
-    float radius = 80;
-    graphicMask1.ellipse(x[pos], y[pos], radius, radius);
+  if (mouseDragged) {
+    graphicMask1.beginDraw();
+    graphicMask1.noStroke();
+    graphicMask1.ellipse(mouseX, mouseY, 80, 80);
+    graphicMask1.endDraw();
   }
-  graphicMask1.endDraw();
   
   //draw the second mask shape
-  x[indexPosition] = mouseX;
-  y[indexPosition] = mouseY;
-  indexPosition = (indexPosition + 1) % num;
-  graphicMask2.beginDraw();
-  graphicMask2.noStroke();
-  for (int i = 0; i < num; i++) {
-    int pos = (indexPosition + 1) % num;
-    float radius = 20;
-    graphicMask2.ellipse(x[pos], y[pos], radius, radius);
-  }
-  graphicMask2.endDraw();
+  //graphicMask2.beginDraw();
+  //graphicMask2.noStroke();
+  //graphicMask2.ellipse(mouseX, mouseY, 100, 100);
+  //graphicMask2.endDraw();
   
   //show the first image
   mask1Reveal();
   
-  if(mousePressed) {
-    mask2Reveal();
-  }
+  //after the timer is up, show the second image
+  //if (mousePressed) {
+  //  mask1Reveal();
+  //}
 }
 
 
@@ -88,10 +70,17 @@ void mask1Reveal() {
 }
 
 //load another image and mask it with the PGraphics shape 2
-void mask2Reveal() {
-  revealedImage = mov.get();
-  revealedImage.mask(graphicMask2);
-  image(revealedImage, 0, 0);
+//void mask2Reveal() {
+//  revealedImage = mov.get();
+//  revealedImage.mask(graphicMask2);
+//  image(revealedImage, 0, 0);
+//}
+
+void mouseReleased() {
+  loadPixels();
+  vr.loadPixels();
+  vr.pixels = pixels;
+  vr.updatePixels();
 }
 
 void movieEvent(Movie m) {
