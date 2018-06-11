@@ -1,24 +1,23 @@
-//modifying existing sketch to work with recorded video and webcam
+//modifying to use arrays for storing mouse position history
 
 import processing.video.*;
 
 Capture cam;
 Movie mov;
 PImage vr;
-//PImage galaxy;
-//PImage crystals;
+
 PImage revealedImage;
 PGraphics graphicMask1;
 PGraphics graphicMask2;
-int newFrame = 0;
-int savedTime;
-int totalTime = 6000;
+
+int num = 5;
+int[] x = new int[num];
+int[] y = new int[num];
+int indexPosition = 0;
+
 
 void setup() {
   size(640, 480);
-  
-  //variable for counter
-  savedTime = millis();
   
   //initialize Movie object
   mov = new Movie(this, "camera.mp4");
@@ -45,27 +44,37 @@ void draw() {
   }
   image(cam, 0, 0, width, height);
   
-  //set up counter
-  int passedTime = millis() - savedTime;
-  
   //draw the first mask shape
+  x[indexPosition] = mouseX;
+  y[indexPosition] = mouseY;
+  indexPosition = (indexPosition + 1) % num;
   graphicMask1.beginDraw();
   graphicMask1.noStroke();
-  graphicMask1.ellipse(mouseX, mouseY, 80, 80);
+  for (int i = 0; i < num; i++) {
+    int pos = (indexPosition + 1) % num;
+    float radius = 80;
+    graphicMask1.ellipse(x[pos], y[pos], radius, radius);
+  }
   graphicMask1.endDraw();
   
   //draw the second mask shape
+  x[indexPosition] = mouseX;
+  y[indexPosition] = mouseY;
+  indexPosition = (indexPosition + 1) % num;
   graphicMask2.beginDraw();
   graphicMask2.noStroke();
-  graphicMask2.ellipse(mouseX, mouseY, 100, 100);
+  for (int i = 0; i < num; i++) {
+    int pos = (indexPosition + 1) % num;
+    float radius = 20;
+    graphicMask2.ellipse(x[pos], y[pos], radius, radius);
+  }
   graphicMask2.endDraw();
   
   //show the first image
-  mask2Reveal();
+  mask1Reveal();
   
-  //after the timer is up, show the second image
-  if (passedTime > totalTime) {
-    mask1Reveal();
+  if(mousePressed) {
+    mask2Reveal();
   }
 }
 
