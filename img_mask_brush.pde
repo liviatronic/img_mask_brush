@@ -1,9 +1,12 @@
 //using pixels to draw the background
+// Press 'q' to finish saving the movie and exit.
 
 import processing.video.*;
+import com.hamoid.*;
 
 Capture cam;
 Movie mov;
+VideoExport videoExport;
 PImage vr;
 PImage revealedImage;
 PGraphics graphicMask1;
@@ -13,12 +16,16 @@ PGraphics graphicMask2;
 void setup() {
   size(640, 480);
   
+  //initialize VideoExport object
+  videoExport = new VideoExport(this);
+  videoExport.startMovie();
+  
   //initialize Movie object
   mov = new Movie(this, "camera.mp4");
   //start movie playing
   mov.loop();
   
-  //initialize the Capture object
+  //initialize Capture object
   cam = new Capture(this, width, height);
   cam.start(); //start the capture device
   
@@ -46,17 +53,19 @@ void draw() {
   //draw the second mask shape
   graphicMask1.beginDraw();
   graphicMask1.noStroke();
-  graphicMask1.ellipse(mouseX, mouseY, 100, 100);
+  graphicMask1.ellipse(mouseX, mouseY, 80, 80);
   graphicMask1.endDraw();
   
   //mask 1 draws whatever was in the frame when the mouse last clicked, 
   //including freezing whatever frame mask 2 was on
-  mask2Reveal();
+  mask1Reveal();
   
   if (mousePressed) {
     //mask 2 plays the video as normal
-    mask1Reveal();
+    mask2Reveal();
   }
+  
+  videoExport.saveFrame();
 }
 
 
@@ -74,7 +83,7 @@ void mask2Reveal() {
   image(revealedImage, 0, 0);
 }
 
-void mouseClicked() {
+void mouseReleased() {
   loadPixels();
   vr.loadPixels();
   vr.pixels = pixels;
@@ -83,4 +92,11 @@ void mouseClicked() {
 
 void movieEvent(Movie m) {
   m.read();
+}
+
+void keyPressed() {
+  if (key == 'q') {
+    videoExport.endMovie();
+    exit();
+  }
 }
