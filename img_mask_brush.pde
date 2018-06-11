@@ -43,7 +43,12 @@ void draw() {
   if (cam.available()) {
     cam.read();
   }
-  image(cam, 0, 0, width, height);
+  
+  //flip webcam so it acts like a mirror
+  pushMatrix();   // just so nothing else is affected
+  scale(-1, 1);
+  image(cam, -cam.width, 0);
+  popMatrix();
 
   graphicMask2.beginDraw();
   graphicMask2.noStroke();
