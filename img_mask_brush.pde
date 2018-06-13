@@ -1,40 +1,41 @@
-//using pixels to draw the background
-// Press 'q' to finish saving the movie and exit.
-
 import processing.video.*;
 import com.hamoid.*;
 
 Capture cam;
-Movie mov;
-VideoExport videoExport;
+PImage galaxy;
 PImage vr;
 PImage revealedImage;
-PGraphics graphicMask1;
-PGraphics graphicMask2;
+PGraphics graphicMask;
+
+int[] xpos = new int[50];
+int[] ypos = new int[50];
+
+int savedTime;
+int totalTime = 6000;
 
 
 void setup() {
   size(640, 480);
   
-  //initialize VideoExport object
-  videoExport = new VideoExport(this);
-  videoExport.startMovie();
-  
-  //initialize Movie object
-  mov = new Movie(this, "camera.mp4");
-  //start movie playing
-  mov.loop();
+  //variable for counter
+  savedTime = millis();
   
   //initialize Capture object
-  cam = new Capture(this, width, height);
+  cam = new Capture(this, width, height, "HD Pro Webcam C920", 30);
   cam.start(); //start the capture device
   
-  //load image
+  //load images
   vr = loadImage("vr-640.jpg");
+  galaxy = loadImage("galaxy-640.jpg");
   
-  //variables for PGraphics
-  graphicMask1 = createGraphics(width, height, JAVA2D);
-  graphicMask2 = createGraphics(width, height, JAVA2D);
+  //variable for PGraphics
+  graphicMask = createGraphics(width, height, JAVA2D);
+  
+  //initialize all elements of each array to zero
+  for (int i = 0; i < xpos.length; i++) {
+    xpos[i] = 0;
+    ypos[i] = 0;
+  }
 }
 
 
@@ -44,64 +45,46 @@ void draw() {
     cam.read();
   }
   
+  //set up counter
+  int passedTime = millis() - savedTime;
+  
   //flip webcam so it acts like a mirror
   pushMatrix();   // just so nothing else is affected
   scale(-1, 1);
   image(cam, -cam.width, 0);
   popMatrix();
-
-  graphicMask2.beginDraw();
-  graphicMask2.noStroke();
-  graphicMask2.ellipse(mouseX, mouseY, 30, 30);
-  graphicMask2.endDraw();
   
-  //draw the second mask shape
-  graphicMask1.beginDraw();
-  graphicMask1.noStroke();
-  graphicMask1.ellipse(mouseX, mouseY, 80, 80);
-  graphicMask1.endDraw();
+  makeMask();
+  drawImg1();
   
-  //mask 1 draws whatever was in the frame when the mouse last clicked, 
-  //including freezing whatever frame mask 2 was on
-  mask1Reveal();
-  
-  if (mousePressed) {
-    //mask 2 plays the video as normal
-    mask2Reveal();
+//after the timer is up, show the second image
+  if (passedTime > totalTime) {
+    //NOW START OVER!
+    makeMask();
+    drawImg2();
   }
   
-  videoExport.saveFrame();
 }
 
 
-//load an image and mask it with the PGraphics shape 1
-void mask1Reveal() {
+void makeMask() {
+  //draw the mask shape into a PGraphics object
+  graphicMask.beginDraw();
+  graphicMask.noStroke();
+  graphicMask.ellipse(mouseX, mouseY, 30, 30);
+  graphicMask.endDraw();
+}
+
+//load an image and mask it with the PGraphics object
+void drawImg1() {
   revealedImage = vr.get();
-  revealedImage.mask(graphicMask1);
+  revealedImage.mask(graphicMask);
   image(revealedImage, 0, 0);
 }
 
-//load another image and mask it with the PGraphics shape 2
-void mask2Reveal() {
-  revealedImage = mov.get();
-  revealedImage.mask(graphicMask2);
+//load an image and mask it with the PGraphics object
+void drawImg2() {
+  revealedImage = galaxy.get();
+  revealedImage.mask(graphicMask);
   image(revealedImage, 0, 0);
-}
-
-void mouseReleased() {
-  loadPixels();
-  vr.loadPixels();
-  vr.pixels = pixels;
-  vr.updatePixels();
-}
-
-void movieEvent(Movie m) {
-  m.read();
-}
-
-void keyPressed() {
-  if (key == 'q') {
-    videoExport.endMovie();
-    exit();
   }
-}
