@@ -2,40 +2,38 @@ import processing.video.*;
 import com.hamoid.*;
 
 Capture cam;
-PImage galaxy;
-PImage vr;
+Movie mov1;
+Movie mov2;
+VideoExport videoExport;
+
 PImage revealedImage;
 PGraphics graphicMask;
 
-int[] xpos = new int[50];
-int[] ypos = new int[50];
-
-int savedTime;
-int totalTime = 6000;
-
 
 void setup() {
-  size(640, 480);
+  size(1280, 960, P2D);
+  frameRate(30);
   
-  //variable for counter
-  savedTime = millis();
+  //initialize VideoExport object
+  videoExport = new VideoExport(this);
+  videoExport.startMovie();
+  
+  //initialize Movie object
+  mov1 = new Movie(this, "facecam1.mp4");
+  //start movie playing
+  mov1.loop();
+  
+  //initialize Movie object
+  mov2 = new Movie(this, "facecam2.mp4");
+  //start movie playing
+  mov2.loop();
   
   //initialize Capture object
   cam = new Capture(this, width, height, "HD Pro Webcam C920", 30);
   cam.start(); //start the capture device
-  
-  //load images
-  vr = loadImage("vr-640.jpg");
-  galaxy = loadImage("galaxy-640.jpg");
-  
+ 
   //variable for PGraphics
   graphicMask = createGraphics(width, height, JAVA2D);
-  
-  //initialize all elements of each array to zero
-  for (int i = 0; i < xpos.length; i++) {
-    xpos[i] = 0;
-    ypos[i] = 0;
-  }
 }
 
 
@@ -44,9 +42,6 @@ void draw() {
   if (cam.available()) {
     cam.read();
   }
-  
-  //set up counter
-  int passedTime = millis() - savedTime;
   
   //flip webcam so it acts like a mirror
   pushMatrix();   // just so nothing else is affected
@@ -57,8 +52,8 @@ void draw() {
   makeMask();
   drawImg1();
   
-//after the timer is up, show the second image
-  if (passedTime > totalTime) {
+////after the timer is up, show the second image
+  if (mousePressed) {
     //NOW START OVER!
     makeMask();
     drawImg2();
@@ -71,20 +66,25 @@ void makeMask() {
   //draw the mask shape into a PGraphics object
   graphicMask.beginDraw();
   graphicMask.noStroke();
-  graphicMask.ellipse(mouseX, mouseY, 30, 30);
+  graphicMask.rect(mouseX, mouseY, 100, 100);
   graphicMask.endDraw();
 }
 
 //load an image and mask it with the PGraphics object
 void drawImg1() {
-  revealedImage = vr.get();
+  //draw the movie into a PImage object
+  revealedImage = mov1.get();
   revealedImage.mask(graphicMask);
   image(revealedImage, 0, 0);
 }
 
 //load an image and mask it with the PGraphics object
 void drawImg2() {
-  revealedImage = galaxy.get();
+  revealedImage = mov2.get();
   revealedImage.mask(graphicMask);
   image(revealedImage, 0, 0);
   }
+
+void movieEvent(Movie m) {
+  m.read();
+}
